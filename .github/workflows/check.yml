@@ -15,5 +15,6 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - run: npm run bake -- --seed ci --size 48 --grid 3 --out "$RUNNER_TEMP/portrait"
       - run: npm run build:example
       - run: npm pack

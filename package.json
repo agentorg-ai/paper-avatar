@@ -43,9 +43,9 @@
     "build:example": "node scripts/example.mjs",
     "test": "npm run build && node --test test/*.test.mjs",
     "test:browser": "playwright test",
-    "prepack": "npm run build",
     "bake": "node scripts/bake.mjs",
-    "prebake": "npm run build"
+    "prebake": "npm run build",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "three": "0.170.0"

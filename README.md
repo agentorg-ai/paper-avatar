@@ -14,6 +14,8 @@ Install the compiled ESM package and TypeScript declarations from the GitHub rel
 npm install https://github.com/uniac-dev/paper-avatar/releases/download/v0.1.0/uniac-dev-paper-avatar-0.1.0.tgz
 ```
 
+To build the same tag from source during installation, use `npm install github:uniac-dev/paper-avatar#v0.1.0`.
+
 The core works with a sized HTML element. React 18 and 19 applications can use the optional React entry point.
 
 ```ts

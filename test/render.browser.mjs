@@ -75,6 +75,79 @@ test('bake an atlas once, replay serialized pixels in a fresh browser page with 
   await consumer.close();
 });
 
+test('the default picture has 64 selectable poses and an exact front-facing still', async ({page}) => {
+  await open(page, harness);
+  const result = await page.evaluate(async () => {
+    const view = {width:64, height:80, neutralYaw:0, headPitchRange:12};
+    const atlas = await api.bakeAvatar(api.DEFAULT_AVATAR, {...view, mode:'picture'});
+    const still = await api.bakeAvatar(api.DEFAULT_AVATAR, {...view, mode:'static'});
+    async function decode(src) {
+      const image = new Image();
+      image.src = src;
+      await image.decode();
+      return image;
+    }
+    const sheet = await decode(atlas.image);
+    const tile = document.createElement('canvas');
+    tile.width = view.width;
+    tile.height = view.height;
+    const ctx = tile.getContext('2d');
+    function crop(image, column = 0, row = 0) {
+      ctx.clearRect(0, 0, tile.width, tile.height);
+      ctx.drawImage(image, column * tile.width, row * tile.height, tile.width, tile.height,
+        0, 0, tile.width, tile.height);
+      return tile.toDataURL();
+    }
+
+    const host = document.querySelector('#host');
+    host.style.width = view.width + 'px';
+    host.style.height = view.height + 'px';
+    const portrait = api.mountBakedPortrait(host, atlas, {pixelRatio:1, reducedMotion:'always'});
+    await portrait.ready;
+    const neutral = crop(await decode(still.image));
+    const neutralMatches = neutral === crop(sheet, 4, 4) && neutral === portrait.canvas.toDataURL();
+    const directions = [-1, -.75, -.5, -.25, 0, 1/3, 2/3, 1];
+    const distinct = new Set();
+    const mismatches = [];
+    for (const [row, down] of directions.entries()) {
+      for (const [column, right] of directions.entries()) {
+        portrait.setGaze(right, -down);
+        await new Promise(requestAnimationFrame);
+        const displayed = portrait.canvas.toDataURL();
+        distinct.add(displayed);
+        if (displayed !== crop(sheet, column, row)) mismatches.push([column, row]);
+      }
+    }
+    portrait.dispose();
+    return {grid:[atlas.columns, atlas.rows], pngSize:[sheet.width, sheet.height],
+      neutralMatches, distinct:distinct.size, mismatches};
+  });
+  expect(result).toEqual({grid:[8,8], pngSize:[512,640], neutralMatches:true, distinct:64, mismatches:[]});
+});
+
+test('each picture portrait uses its own requested sampling density', async ({page}) => {
+  await open(page, harness);
+  const result = await page.evaluate(async () => {
+    const atlases = await Promise.all([5, 12].map(atlasGrid => api.bakeAvatar(api.DEFAULT_AVATAR,
+      {mode:'picture', atlasGrid, width:24, height:24, neutralYaw:0, headYawRange:45})));
+    const portraits = atlases.map(atlas => {
+      const host = document.createElement('div');
+      host.style.cssText = 'width:24px;height:24px';
+      document.body.append(host);
+      return api.mountBakedPortrait(host, atlas, {pixelRatio:1, reducedMotion:'always'});
+    });
+    await Promise.all(portraits.map(p => p.ready));
+    const neutral = portraits.map(p => p.canvas.toDataURL());
+    for (const p of portraits) p.setGaze(.2, 0);
+    await new Promise(requestAnimationFrame);
+    const moved = portraits.map((p, i) => p.canvas.toDataURL() !== neutral[i]);
+    for (const p of portraits) p.dispose();
+    return {grids:atlases.map(a => [a.columns, a.rows]), moved};
+  });
+  // A gaze of 0.2 is inside the 5×5 neutral bin and one step from center on 12×12.
+  expect(result).toEqual({grids:[[5,5], [12,12]], moved:[false, true]});
+});
+
 test('React can replace an in-flight bake under Strict Mode and dispose a mounted portrait', async ({page}) => {
   const uncaught = [];
   page.on('pageerror', err => uncaught.push(err.message));

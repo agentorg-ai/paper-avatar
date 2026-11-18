@@ -1,5 +1,5 @@
 import {
-  DEFAULT_AVATAR, avatarOptions, encodeAvatar, generateAvatar, mountAvatar, parseAvatar,
+  DEFAULT_AVATAR, avatarOptions, encodeAvatar, generateAvatar, mountAvatar, parseAvatar, pictureGrid,
 } from '../src/index.js';
 import type { AvatarRecipe, PortraitHandle, PortraitOptions } from '../src/index.js';
 
@@ -18,10 +18,13 @@ const input = byId<HTMLInputElement>('avatar-id');
 const apply = byId<HTMLButtonElement>('apply');
 const copy = byId<HTMLButtonElement>('copy');
 const crop = byId<HTMLSelectElement>('framing');
+const gridInput = byId<HTMLInputElement>('atlas-grid');
+const gridCount = byId<HTMLOutputElement>('grid-count');
+const gridError = byId('grid-error');
 const parts = byId('parts');
 const sliders = byId('sliders');
 const preferences = [
-  { key: 'neutralYaw', label: 'Resting angle', value: -30, min: -65, max: 65, step: 1, format: (v: number) => v + '°' },
+  { key: 'neutralYaw', label: 'Resting angle', value: 0, min: -65, max: 65, step: 1, format: (v: number) => v + '°' },
   { key: 'headYawRange', label: 'Head turn', value: 25, min: 0, max: 55, step: .5, format: (v: number) => '±' + v + '°' },
   { key: 'headPitchRange', label: 'Head tilt', value: 8, min: 0, max: 24, step: 1, format: (v: number) => '±' + v + '°' },
   { key: 'bodyYawRange', label: 'Body turn', value: 1.5, min: 0, max: 18, step: .5, format: (v: number) => '±' + v + '°' },
@@ -33,6 +36,7 @@ type RangeKey = (typeof preferences)[number]['key'];
 
 let avatar = DEFAULT_AVATAR;
 let mode: NonNullable<PortraitOptions['mode']> = 'live';
+let grid: number = pictureGrid.default;
 let portrait: PortraitHandle | undefined;
 const ranges = new Map<RangeKey, HTMLInputElement>();
 const partsControls = new Map<keyof AvatarRecipe, HTMLSelectElement | HTMLFieldSetElement>();
@@ -137,7 +141,7 @@ function render(): void {
       mode, framing: crop.value === 'portrait' ? 'portrait' : 'bust',
       position: { x: valueOf('x'), y: valueOf('y') }, zoom: valueOf('zoom'),
       neutralYaw: valueOf('neutralYaw'), headYawRange: valueOf('headYawRange'), headPitchRange: valueOf('headPitchRange'),
-      bodyYawRange: valueOf('bodyYawRange'), atlasGrid: 5, label: 'Paper avatar',
+      bodyYawRange: valueOf('bodyYawRange'), atlasGrid: grid, label: 'Paper avatar',
     });
     portrait = next;
     void next.ready.then(() => {
@@ -177,15 +181,51 @@ function selectAvatar(raw: string, save = true): void {
       if (output) output.value = avatarOptions[field].find(choice => choice.value === value)?.label ?? value;
     }
   }
-  if (save) {
-    const hash = '#avatar=' + encodeURIComponent(avatar);
-    if (location.hash !== hash) history.replaceState(null, '', hash);
-  }
+  if (save) saveLocation();
   render();
+}
+
+function saveLocation(): void {
+  const hash = '#' + new URLSearchParams({ avatar, mode, grid: String(grid) });
+  if (location.hash !== hash) history.replaceState(null, '', hash);
+}
+
+function validGrid(value: number): boolean {
+  return Number.isInteger(value) && value >= pictureGrid.min && value <= pictureGrid.max;
+}
+
+function showGrid(): void {
+  gridInput.value = String(grid);
+  gridInput.removeAttribute('aria-invalid');
+  gridError.textContent = '';
+  gridCount.value = grid + ' × ' + grid + ' · ' + (grid * grid) + ' frames';
+}
+
+function commitGrid(): void {
+  const requested = gridInput.valueAsNumber;
+  if (!validGrid(requested)) {
+    gridInput.setAttribute('aria-invalid', 'true');
+    gridError.textContent = 'Enter a whole number from ' + pictureGrid.min + ' to ' + pictureGrid.max + '.';
+    return;
+  }
+  const changed = requested !== grid;
+  grid = requested;
+  showGrid();
+  if (!changed) return;
+  saveLocation();
+  if (mode === 'picture') render();
 }
 
 function loadLocation(): void {
   const hash = new URLSearchParams(location.hash.slice(1));
+  const savedMode = hash.get('mode');
+  mode = savedMode === 'static' || savedMode === 'picture' ? savedMode : 'live';
+  byId('mode').querySelector<HTMLInputElement>('input[value="' + mode + '"]')!.checked = true;
+  const savedGrid = hash.get('grid');
+  const requested = savedGrid === null ? pictureGrid.default : Number(savedGrid);
+  grid = validGrid(requested) ? requested : pictureGrid.default;
+  showGrid();
+  if (!validGrid(requested)) gridError.textContent = 'This link has an invalid grid. Using ' + grid + ' × ' + grid + '.';
   const raw = hash.get('avatar') ?? hash.get('look');
   try {
     selectAvatar(raw ?? DEFAULT_AVATAR, false);
@@ -195,6 +235,13 @@ function loadLocation(): void {
   }
 }
 
+gridInput.min = String(pictureGrid.min);
+gridInput.max = String(pictureGrid.max);
+gridInput.addEventListener('change', commitGrid);
+gridInput.addEventListener('keydown', event => {
+  if (event.key === 'Enter') { event.preventDefault(); commitGrid(); }
+  if (event.key === 'Escape') showGrid();
+});
 buildPartControls();
 buildRangeControls();
 byId('shuffle').addEventListener('click', () => {
@@ -208,6 +255,7 @@ byId('mode').addEventListener('change', event => {
   const value = event.target.value;
   if (value === 'static' || value === 'picture' || value === 'live') {
     mode = value;
+    saveLocation();
     render();
   }
 });

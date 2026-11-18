@@ -4,7 +4,7 @@ import type { BakeOptions, PortraitOptions } from './render/index.js';
 
 export { DEFAULT_AVATAR, avatarOptions, encodeAvatar, generateAvatar, parseAvatar } from './identity.js';
 export type { AvatarRecipe } from './identity.js';
-export { mountBakedPortrait } from './render/player.js';
+export { mountBakedPortrait, pictureGrid } from './render/player.js';
 export type { BakedPortrait, BakeOptions, PortraitHandle, PortraitOptions } from './render/index.js';
 
 /** Mount an avatar into a sized HTML element. Dispose the handle when removing it. */

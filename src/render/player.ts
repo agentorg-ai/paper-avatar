@@ -1,5 +1,7 @@
-import { cancelled, clamp, createSurface, type Frame } from './surface.js';
+import { tileAtGaze, pictureGrid } from './atlas.js';
+import { cancelled, createSurface, type Frame } from './surface.js';
 import type { BakedPortrait, PlaybackOptions, PortraitHandle } from './types.js';
+export { pictureGrid };
 export type { BakedPortrait, PlaybackOptions, PortraitHandle } from './types.js';
 
 export interface Sheet {
@@ -11,8 +13,8 @@ export interface Sheet {
 }
 
 export function drawSheet(ctx: CanvasRenderingContext2D, sheet: Sheet, frame: Frame) {
-  const column = Math.round((clamp(frame.x, -1, 1) + 1) * 0.5 * (sheet.columns - 1));
-  const row = Math.round((1 - clamp(frame.y, -1, 1)) * 0.5 * (sheet.rows - 1));
+  const column = tileAtGaze(frame.x, sheet.columns);
+  const row = tileAtGaze(-frame.y, sheet.rows);
   const fit = Math.min(frame.width / sheet.width, frame.height / sheet.height);
   const width = sheet.width * fit,
     height = sheet.height * fit;
@@ -35,7 +37,8 @@ export function drawSheet(ctx: CanvasRenderingContext2D, sheet: Sheet, frame: Fr
 function validate(baked: BakedPortrait) {
   const { version, mode, columns, rows, width, height, image } = baked;
   const picture =
-    mode === 'picture' && columns === rows && columns >= 3 && columns <= 9 && columns % 2 === 1;
+    mode === 'picture' && columns === rows && Number.isInteger(columns) &&
+    columns >= pictureGrid.min && columns <= pictureGrid.max;
   const still = mode === 'static' && columns === 1 && rows === 1;
   if (
     version !== 1 ||

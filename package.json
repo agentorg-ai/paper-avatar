@@ -1,0 +1,70 @@
+{
+  "name": "@uniac-dev/paper-avatar",
+  "version": "0.1.0",
+  "description": "Folded-paper people for AgentOrg, with reproducible identities, sprite portraits and articulated 3D.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Uniac",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uniac-dev/paper-avatar.git"
+  },
+  "homepage": "https://github.com/uniac-dev/paper-avatar#readme",
+  "bugs": "https://github.com/uniac-dev/paper-avatar/issues",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE.md",
+    "README.md"
+  ],
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./identity": {
+      "types": "./dist/identity.d.ts",
+      "import": "./dist/identity.js"
+    },
+    "./player": {
+      "types": "./dist/render/player.d.ts",
+      "import": "./dist/render/player.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node scripts/example.mjs --serve",
+    "build:example": "node scripts/example.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "test:browser": "playwright test",
+    "prepack": "npm run build",
+    "bake": "node scripts/bake.mjs",
+    "prebake": "npm run build"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/react": "^19.2.0",
+    "@types/three": "0.170.0",
+    "esbuild": "0.28.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "5.9.3"
+  }
+}

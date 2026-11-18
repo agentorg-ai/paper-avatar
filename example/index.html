@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8f6ef" />
+    <title>Paper avatars · AgentOrg</title>
+    <link rel="stylesheet" href="./studio.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="brand"><span class="paper-mark" aria-hidden="true"></span>AgentOrg</div>
+      <a class="source-link" href="https://github.com/uniac-dev/paper-avatar">View source <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <div class="title-row">
+        <h1>Paper avatars</h1>
+        <button type="button" id="shuffle" class="primary"><span aria-hidden="true">⤨</span> Shuffle</button>
+      </div>
+
+      <div class="workshop">
+        <section class="preview" aria-label="Avatar preview">
+          <fieldset class="mode-picker" id="mode">
+            <legend class="sr-only">Display mode</legend>
+            <label><input name="mode" type="radio" value="static" /><span>Static</span></label>
+            <label><input name="mode" type="radio" value="picture" /><span>Picture</span></label>
+            <label><input name="mode" type="radio" value="live" checked /><span>Live 3D</span></label>
+          </fieldset>
+          <div id="stage" class="stage">
+            <div id="portrait"></div>
+            <p id="render-status" role="status"></p>
+          </div>
+          <p id="mode-hint" class="mode-hint"></p>
+          <form class="identity" id="identity" autocomplete="off">
+            <label for="avatar-id">Avatar string</label>
+            <div class="code-row">
+              <input id="avatar-id" spellcheck="false" autocapitalize="none" autocomplete="off" aria-describedby="id-status" />
+              <button type="submit" id="apply" hidden>Apply</button>
+              <button type="button" id="copy">Copy</button>
+            </div>
+            <p id="id-status" role="status"></p>
+          </form>
+        </section>
+
+        <div class="controls">
+          <section aria-labelledby="parts-title">
+            <h2 id="parts-title">Appearance</h2>
+            <div id="parts"></div>
+          </section>
+          <details class="pose" open>
+            <summary>Framing &amp; motion</summary>
+            <div class="pose-content">
+              <label class="select-row" for="framing"><span>Crop</span>
+                <select id="framing"><option value="bust">Bust</option><option value="portrait">Close portrait</option></select>
+              </label>
+              <div id="sliders"></div>
+              <button type="button" class="text-button" id="reset-view">Reset view</button>
+            </div>
+          </details>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

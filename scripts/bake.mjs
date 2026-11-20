@@ -5,23 +5,26 @@ import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { chromium } from '@playwright/test';
+import { pictureGrid } from '../dist/render/atlas.js';
 import { DEFAULT_AVATAR, encodeAvatar, generateAvatar, parseAvatar } from '../dist/identity.js';
 
 const {values} = parseArgs({ options: {
   avatar: {type:'string'}, seed: {type:'string'}, out: {type:'string'},
-  size: {type:'string',default:'160'}, grid: {type:'string',default:'5'},
+  size: {type:'string',default:'160'}, grid: {type:'string'},
   view: {type:'string'}, help: {type:'boolean'}
 }});
 if (values.help || !values.out) {
-  console.log('npm run bake -- --out <directory> [--avatar <id> | --seed <text>] [--size 160] [--grid 5] [--view camera.json]');
+  console.log('npm run bake -- --out <directory> [--avatar <id> | --seed <text>] [--size 160] [--grid 8] [--view camera.json]');
   process.exit(values.help ? 0 : 1);
 }
 if (values.avatar !== undefined && values.seed !== undefined) throw new Error('Choose an avatar ID or a seed.');
 const id = values.avatar !== undefined ? encodeAvatar(parseAvatar(values.avatar))
   : values.seed !== undefined ? generateAvatar(values.seed) : DEFAULT_AVATAR;
-const size = Number(values.size), grid = Number(values.grid);
+const size = Number(values.size), grid = values.grid === undefined ? undefined : Number(values.grid);
 if (!Number.isInteger(size) || size < 1 || size > 2048) throw new Error('Size must be an integer from 1 to 2048.');
-if (![3,5,7,9].includes(grid)) throw new Error('Grid must be 3, 5, 7 or 9.');
+if (grid !== undefined && (!Number.isInteger(grid) || grid < pictureGrid.min || grid > pictureGrid.max)) {
+  throw new Error(`Grid must be an integer from ${pictureGrid.min} to ${pictureGrid.max}.`);
+}
 const view = values.view ? JSON.parse(await readFile(values.view,'utf8')) : {framing:'portrait'};
 const root = fileURLToPath(new URL('../', import.meta.url));
 const bundle = await build({stdin:{contents:"import {bakeAvatar} from './dist/index.js';window.bake = bakeAvatar;",resolveDir:root},

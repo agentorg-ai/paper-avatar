@@ -70,10 +70,12 @@ Each mount returns `canvas`, `ready`, `setGaze(x, y)` and `dispose()`. Input ran
 | `neutralYaw`, `neutralPitch` | Resting angles in degrees. A yaw of 0 faces the camera. |
 | `headYawRange`, `headPitchRange` | Maximum travel to each side of neutral, in degrees. Defaults are 25° horizontal and 8° vertical. |
 | `bodyYawRange` | Shoulder rotation to either side, default 1.5°. Use 0 to hold the body still. |
-| `atlasGrid` | Number of sampled directions per axis in picture mode. Choose 3, 5, 7 or 9. Default is 5. |
+| `atlasGrid` | Number of sampled directions per axis in picture mode. Choose an integer from 3 to 32 per portrait. The default 8×8 atlas holds 64 views and includes the exact resting pose. |
 | `interactive`, `idle` | Enable pointer/keyboard handling and autonomous live motion independently. Programmatic gaze works with interaction disabled. |
 | `reducedMotion` | `'system'` (default), `'always'` or `'never'`. Reduced motion removes easing and idle movement. |
 | `background`, `pixelRatio`, `label` | CSS backdrop color (default transparent), backing resolution, and accessible image name. |
+
+Set `atlasGrid` on each picture mount (including React’s `PictureAvatar`) or bake. For example, `mountAvatar(host, id, { mode: 'picture', atlasGrid: 12 })` samples 144 views of that identity. The same ID can use a different grid in another profile. The workshop’s **Picture grid** input changes the size interactively. The baker limits each sheet to 8 megapixels and 4096 pixels per edge, so denser grids can have smaller tiles. Read the returned `columns`, `rows`, `width` and `height` for the exact layout.
 
 ## Bake once for an AgentOrg roster
 
@@ -82,7 +84,7 @@ From a source checkout, generate a neutral PNG, a directional PNG and an `avatar
 ```sh
 npm ci
 npx playwright install chromium
-npm run bake -- --seed agent-42 --size 160 --grid 5 --out ./avatars/agent-42
+npm run bake -- --seed agent-42 --size 160 --grid 8 --out ./avatars/agent-42
 ```
 
 Use `--avatar <string>` for an existing identity. Use `--view camera.json` for a JSON object with camera settings such as `{"framing":"portrait","neutralYaw":-20,"headYawRange":30}`. Width and height in the manifest give the actual tile size after the atlas limits are applied. This authoring command renders in headless Chromium and can run in CI.

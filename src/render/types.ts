@@ -35,7 +35,7 @@ export interface PortraitOptions extends CameraOptions, PlaybackOptions {
   mode?: DisplayMode;
   /** Subtle autonomous movement in live mode. Defaults to true. */
   idle?: boolean;
-  /** Number of gaze samples per axis in picture mode. Odd numbers from 3 to 9, default 5. */
+  /** Number of gaze samples per axis in picture mode. Integers from 3 to 32, default 8. */
   atlasGrid?: number;
 }
 
@@ -44,6 +44,7 @@ export interface BakeOptions extends CameraOptions {
   /** Pixel dimensions of a frame before applying the atlas safety limits. */
   width?: number;
   height?: number;
+  /** Directional samples per axis for this bake, 3–32. Default 8. */
   atlasGrid?: number;
   /** Fill baked pixels with this CSS color, or leave them transparent. */
   background?: string;

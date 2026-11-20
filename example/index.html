@@ -27,6 +27,12 @@
             <label><input name="mode" type="radio" value="picture" /><span>Picture</span></label>
             <label><input name="mode" type="radio" value="live" checked /><span>Live 3D</span></label>
           </fieldset>
+          <div class="picture-grid">
+            <label for="atlas-grid">Picture grid</label>
+            <input id="atlas-grid" type="number" inputmode="numeric" step="1" required aria-describedby="grid-count grid-error" />
+            <output id="grid-count" for="atlas-grid"></output>
+            <p id="grid-error" role="status"></p>
+          </div>
           <div id="stage" class="stage">
             <div id="portrait"></div>
             <p id="render-status" role="status"></p>

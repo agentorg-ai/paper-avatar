@@ -1,12 +1,14 @@
 import type { AvatarRecipe } from '../identity.js';
 import type { BakeOptions, BakedPortrait } from './types.js';
+import { gazeAtTile, pictureGrid } from './atlas.js';
 import { acquireStudio } from './studio.js';
 import { cancelled, clamp, finite, untilAborted } from './surface.js';
 import type { Sheet } from './player.js';
 
 function dimensions(options: BakeOptions) {
-  const wanted = clamp(Math.round(finite(options.atlasGrid, 5)), 3, 9);
-  const grid = options.mode === 'picture' ? Math.min(9, wanted % 2 ? wanted : wanted + 1) : 1;
+  const grid = options.mode === 'picture'
+    ? clamp(Math.round(finite(options.atlasGrid, pictureGrid.default)), pictureGrid.min, pictureGrid.max)
+    : 1;
   const rawWidth = clamp(Math.round(finite(options.width, 256)), 1, 2048);
   const rawHeight = clamp(Math.round(finite(options.height, 256)), 1, 2048);
   const scale = Math.min(
@@ -56,8 +58,8 @@ export function bakeSheet(
       function render(index: number) {
         const col = index % columns,
           row = Math.floor(index / columns);
-        const x = columns === 1 ? 0 : (col / (columns - 1)) * 2 - 1;
-        const y = rows === 1 ? 0 : 1 - (row / (rows - 1)) * 2;
+        const x = gazeAtTile(col, columns);
+        const y = -gazeAtTile(row, rows);
         const source = studio.draw(
           recipe,
           options,

@@ -2,19 +2,19 @@
 
 A TypeScript library for AgentOrg’s folded-paper people. One versioned string describes a character’s face color, hairstyle, hair color, outfit, clothing color and accessory. Render that identity as a still, a direction-aware picture, or an articulated 3D portrait.
 
-![Three portraits rendered with different paper folds, garments and hair textures](https://raw.githubusercontent.com/uniac-dev/paper-avatar/v0.1.0/docs/portraits.png)
+![Three portraits rendered with different paper folds, garments and hair textures](https://raw.githubusercontent.com/agentorg-ai/paper-avatar/v0.2.0/docs/portraits.png)
 
-[Download the interactive workshop](https://github.com/uniac-dev/paper-avatar/releases/download/v0.1.0/paper-avatar-workshop.html) and open the HTML file in a WebGL 2 browser. The artwork and textures are embedded. Try the same character in all three modes, change the shoulder and head ranges separately, then copy its string.
+[Download the interactive workshop](https://github.com/agentorg-ai/paper-avatar/releases/download/v0.2.0/paper-avatar-workshop.html) and open the HTML file in a WebGL 2 browser. The artwork and textures are embedded. Try the same character in all three modes, change the shoulder and head ranges separately, then copy its string.
 
 ## Install
 
 Install the compiled ESM package and TypeScript declarations from the GitHub release.
 
 ```sh
-npm install https://github.com/uniac-dev/paper-avatar/releases/download/v0.1.0/uniac-dev-paper-avatar-0.1.0.tgz
+npm install https://github.com/agentorg-ai/paper-avatar/releases/download/v0.2.0/uniac-dev-paper-avatar-0.2.0.tgz
 ```
 
-To build the same tag from source during installation, use `npm install github:uniac-dev/paper-avatar#v0.1.0`.
+To build the same tag from source during installation, use `npm install git+https://github.com/agentorg-ai/paper-avatar.git#v0.2.0`.
 
 The core works with a sized HTML element. React 18 and 19 applications can use the optional React entry point.
 
